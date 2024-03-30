@@ -38,11 +38,11 @@ blogRouter.post('/', async (c) => {
     const {title, content} = await c.req.json();
 
     const post = await prisma.post.create({
-        data: {
-			title,
-			content,
-			authorId: userId
-		}
+      data: {
+        title,
+        content,
+        authorId: userId
+      }
     })
 
     return c.json({

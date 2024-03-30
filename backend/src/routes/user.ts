@@ -62,7 +62,6 @@ userRouter.post('/signin', async(c) => {
   const {email, password} = body
 
   const hashedPassword = await encryptString(password)
-  console.log(hashedPassword)
   
   const user = await prisma.user.findUnique({
     where: {
