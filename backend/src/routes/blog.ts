@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { verify } from 'hono/jwt'
+import { createPostInput, updatePostInput } from '@bhavesh.ittadwar/common'
 
 const blogRouter = new Hono<{
 	Bindings: {
@@ -33,9 +34,16 @@ blogRouter.use('*', async (c, next) => {
 
 // initialize a blog
 blogRouter.post('/', async (c) => {
-    const userId = c.get('userId');
-    const prisma = c.get('prisma');
-    const {title, content} = await c.req.json();
+    const userId = c.get('userId')
+    const prisma = c.get('prisma')
+    const {title, content} = await c.req.json()
+
+    const createPostValid = createPostInput.safeParse({title, content})
+
+    if(!createPostValid.success) {
+      c.status(403);
+      return c.json({ message: 'Either content or title missing or entered in the wrong format' })
+    }
 
     const post = await prisma.post.create({
       data: {
@@ -51,18 +59,62 @@ blogRouter.post('/', async (c) => {
 })
 
 // update a blog
-blogRouter.put('/', (c) => {
-  return c.text('blog put')
+blogRouter.put('/', async (c) => {
+  const prisma = c.get('prisma')
+  const {blogId, title, content} = await c.req.json();
+  const updatePostValid = updatePostInput.safeParse({title, content})
+  if(!updatePostValid.success) {
+    c.status(403);
+    return c.json({ message: 'Title and/or content entered in the wrong format' })
+  }
+  
+  await prisma.post.update({
+    where: {
+      id: blogId
+    },
+    data: {
+      title,
+      content
+    }
+  })
+  return c.text('Post Updated Succesfully')
 })
 
 // get all blogs
-blogRouter.get('/bulk', (c) => {
-  return c.text('blog bulk get')
+blogRouter.get('/bulk', async(c) => {
+  const prisma = c.get('prisma')
+
+  const blogs = await prisma.post.findMany()
+
+  if(!blogs) {
+    c.status(404);
+    return c.json({ error: "blogs not found" })
+  }
+
+  return c.json(blogs)
 })
 
 // get a specific blog
-blogRouter.get('/:id', (c) => {
-  return c.text('blog:id get')
+blogRouter.get('/:id', async (c) => {
+  const blogId = c.req.param('id');
+  const prisma = c.get('prisma')
+
+  const blog = await prisma.post.findUnique({
+    where: {
+      id: blogId
+    }
+  })
+
+  if(!blog) {
+    c.status(404);
+    return c.json({ error: "blog not found" })
+  }
+
+  return c.json({
+    id: blog.id,
+    title: blog.title,
+    content: blog.content
+  })
 })
 
 export { blogRouter }

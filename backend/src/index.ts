@@ -4,15 +4,19 @@ import { withAccelerate } from '@prisma/extension-accelerate'
 import {userRouter} from './routes/user'
 import {blogRouter} from './routes/blog'
 
+type Bindings = {
+  DATABASE_URL: string;
+  JWT_SECRET: string;
+}
+
+type Variables = {
+  userId: string;
+  prisma: any
+}
+
 const app = new Hono<{
-	Bindings: {
-		DATABASE_URL: string;
-    JWT_SECRET: string;
-	},
-  Variables: {
-    userId: string;
-    prisma: any
-  }
+	Bindings: Bindings,
+  Variables: Variables
 }>();
 
 app.use("*", async (c, next) => {
