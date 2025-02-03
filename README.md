@@ -35,13 +35,13 @@ A serverless blogging website with authentication and REST APIs for creating acc
 Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/serverless-blogging.git
+git clone https://github.com/yourusername/blog-app.git
 ```
 
 Navigate to the project directory:
 
 ```bash
-cd serverless-blogging
+cd blog-app
 ```
 
 Install dependencies:
